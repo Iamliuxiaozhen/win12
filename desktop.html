@@ -1643,7 +1643,22 @@ toggletheme() 切换主题
 							</div>
 							<div class="detail" style="font-size: 0.8em; color: var(--text2);">您可以在这里填入您的Github Access Token来提高Github API限制访问次数，即可以更好地使用 Windows 更新、主题等功能。您的 Token 仅会存放在本地浏览器中，该数据不会传输至服务端，也更不会外泄，但请您妥善保管好自己的 Token。</div>
 						</div>
+						<a onclick="$('.dp.github-login').toggleClass('show')" class="dp github-login">
+							<icon><i class="bi bi-github"></i></icon>
+							<div>
+								<p>GitHub 登录</p>
+								<p>使用 GitHub 账户登录</p>
+							</div>
+							<i class="bi bi-chevron-down"></i>
+						</a>
+						<div class="dp github-login">
+							<div class="container" style="display: flex; align-items: center; gap: 10px; justify-content: space-evenly; margin-top: 6px;">
+								<div class="button" onclick="alert('GitHub OAuth')">使用 GitHub 登录</div>
+							</div>
+							<div class="detail" style="font-size: 0.8em; color: var(--text2);">使用 GitHub 账户登录以提高您在Win12中GithubAPI的限额。</div>
+						</div>
 					</div>
+					
 				</div>
 				<div class="cnt update">
 					<p class="title">Windows 更新</p>
