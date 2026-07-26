@@ -2780,7 +2780,7 @@ document.getElementsByTagName('body')[0].onload = () => {
         $('.window.whiteboard>.titbar>p').text('Whiteboard');
         isDark = false;
     }
-    // 桌面版: 从 Tauri settings.json 同步 panic-color 到 localStorage
+    // 桌面版：从 Tauri settings.json 同步 panic-color 到 localStorage
     if (window.win12Native && window.win12Native.isTauri && window.win12Native.isTauri()) {
         (async function() {
             try {
@@ -2930,7 +2930,7 @@ const setData = (k, v) => {
 
 /**
  * 获取蓝屏颜色 (panic-color)
- * 优先级: Tauri settings.json > localStorage > cookie > 默认值 #136fca
+ * 优先级：Tauri settings.json > localStorage > cookie > 默认值 #136fca
  */
 function getPanicColor() {
     // 先尝试从 localStorage 读取 (网页版使用)
@@ -2949,7 +2949,7 @@ function getPanicColor() {
  */
 async function setPanicColor(color) {
     if (window.win12Native && window.win12Native.isTauri && window.win12Native.isTauri()) {
-        // 桌面版: 写入 Tauri settings.json
+    // 桌面版：写入 Tauri settings.json
         try {
             var json = await window.win12Native.readSettings();
             var settings = json ? JSON.parse(json) : {};
@@ -2959,7 +2959,7 @@ async function setPanicColor(color) {
             console.error('Failed to save panic color to Tauri settings:', e);
         }
     }
-    // 网页版: 写入 localStorage 和 cookie (有效期 365 天)
+    // 网页版：写入 localStorage 和 cookie (有效期 365 天)
     localStorage.setItem('panic-color', color);
     var d = new Date();
     d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
