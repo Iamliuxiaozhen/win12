@@ -2568,6 +2568,27 @@ function saveDesktop() {
         localStorage.setItem(key, value);
     });
 }
+
+function setWebGLMode(mode) {
+    mode = ['off', 'partial', 'full'].includes(mode) ? mode : 'partial';
+    localStorage.setItem('webgl-mode', mode);
+    if (window.win12WebGL) window.win12WebGL.apply(mode);
+    const native = window.win12Native;
+    if (native && native.isTauri && native.isTauri()) {
+        native.readSettings().then(json => {
+            const settings = json ? JSON.parse(json) : {};
+            settings.webgl = mode;
+            return native.writeSettings(settings);
+        }).catch(e => console.error('Failed to save WebGL setting:', e));
+    }
+}
+
+function loadWebGLMode() {
+    const select = document.getElementById('webgl-mode');
+    const mode = localStorage.getItem('webgl-mode') || 'partial';
+    if (select) select.value = mode;
+    if (window.win12WebGL) window.win12WebGL.apply(mode);
+}
 //global
 const parentEl = $('#desktop')[0];
 let parentRect = parentEl.getBoundingClientRect();
@@ -2790,12 +2811,19 @@ document.getElementsByTagName('body')[0].onload = () => {
                     if (settings['panic-color']) {
                         localStorage.setItem('panic-color', settings['panic-color']);
                     }
+                    if (['off', 'partial', 'full'].includes(settings.webgl)) {
+                        localStorage.setItem('webgl-mode', settings.webgl);
+                        const select = document.getElementById('webgl-mode');
+                        if (select) select.value = settings.webgl;
+                        if (window.win12WebGL) window.win12WebGL.apply(settings.webgl);
+                    }
                 }
             } catch (e) {
                 console.error('Failed to load settings from Tauri:', e);
             }
         })();
     }
+    setTimeout(loadWebGLMode, 0);
     if (localStorage.getItem('color1')) {
         $(':root').css('--theme-1', localStorage.getItem('color1'));
         $(':root').css('--theme-2', localStorage.getItem('color2'));
