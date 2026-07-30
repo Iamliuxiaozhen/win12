@@ -2585,7 +2585,7 @@ function setWebGLMode(mode) {
 
 function loadWebGLMode() {
     const select = document.getElementById('webgl-mode');
-    const mode = localStorage.getItem('webgl-mode') || 'partial';
+    const mode = localStorage.getItem('webgl-mode') || 'off';
     if (select) select.value = mode;
     if (window.win12WebGL) window.win12WebGL.apply(mode);
 }

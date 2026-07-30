@@ -1531,8 +1531,8 @@ toggletheme() 切换主题
 								<a class="a button" onclick="var c=$('div.dp.advanced>div>input.panic-inp').val();setPanicColor(c);$('div.dp.advanced>div>.color.panic-color').css('background-color',c);">应用</a>
 							</div>
 							<div style="margin-top: 18px;">
-								<p>WebGL</p>
-								<p style="color: var(--text2); font-size: 13px;">启用硬件加速视觉效果；不可用时自动使用普通渲染</p>
+								<p>WebGL <span style="color: var(--text2); font-size: 12px;">（实验性功能）</span></p>
+								<p style="color: var(--text2); font-size: 13px;">启用硬件加速视觉效果；不可用时自动使用普通渲染。默认关闭。</p>
 								<select id="webgl-mode" onchange="setWebGLMode(this.value)" style="margin-top: 8px; width: 100%;">
 									<option value="off">关闭</option><option value="partial">部分</option><option value="full">全部</option>
 								</select>
