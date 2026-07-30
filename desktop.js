@@ -2575,8 +2575,14 @@ function setWebGLMode(mode) {
     const selector = document.getElementById('webgl-mode');
     if (selector) {
         selector.querySelector('.webgl-selector-value span').textContent = { off: '关闭', partial: '部分', full: '全部' }[mode];
-        selector.querySelectorAll('[role="option"]').forEach(option => option.classList.toggle('selected', option.dataset.value === mode));
+        document.querySelectorAll('#webgl-mode-options [role="option"], #webgl-mode .webgl-selector-options [role="option"]').forEach(option => option.classList.toggle('selected', option.dataset.value === mode));
         selector.classList.remove('open');
+        const portal = document.getElementById('webgl-mode-options');
+        if (portal) {
+            portal.classList.remove('webgl-selector-options-portal');
+            portal.style.display = 'none';
+            selector.appendChild(portal);
+        }
     }
     if (window.win12WebGL) window.win12WebGL.apply(mode);
     const native = window.win12Native;
@@ -2591,7 +2597,8 @@ function setWebGLMode(mode) {
 
 function toggleWebGLSelector(event) {
     event.stopPropagation();
-    document.getElementById('webgl-mode')?.classList.toggle('open');
+    const selector = document.getElementById('webgl-mode');
+    selector?.classList.toggle('open');
 }
 
 document.addEventListener('click', () => document.getElementById('webgl-mode')?.classList.remove('open'));
