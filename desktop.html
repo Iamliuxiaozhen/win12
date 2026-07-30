@@ -1533,9 +1533,14 @@ toggletheme() 切换主题
 							<div style="margin-top: 18px;">
 								<p>WebGL <span style="color: var(--text2); font-size: 12px;">（实验性功能）</span></p>
 								<p style="color: var(--text2); font-size: 13px;">启用硬件加速视觉效果；不可用时自动使用普通渲染。默认关闭。</p>
-								<select id="webgl-mode" onchange="setWebGLMode(this.value)" style="margin-top: 8px; width: 100%;">
-									<option value="off">关闭</option><option value="partial">部分</option><option value="full">全部</option>
-								</select>
+								<div class="webgl-selector" id="webgl-mode" tabindex="0" role="listbox" aria-label="WebGL 渲染级别">
+									<div class="webgl-selector-value" onclick="toggleWebGLSelector(event)"><span>关闭</span><i class="bi bi-chevron-down"></i></div>
+									<div class="webgl-selector-options">
+										<a role="option" data-value="off" onclick="setWebGLMode('off')">关闭</a>
+										<a role="option" data-value="partial" onclick="setWebGLMode('partial')">部分</a>
+										<a role="option" data-value="full" onclick="setWebGLMode('full')">全部</a>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

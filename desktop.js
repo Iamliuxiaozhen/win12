@@ -2572,6 +2572,12 @@ function saveDesktop() {
 function setWebGLMode(mode) {
     mode = ['off', 'partial', 'full'].includes(mode) ? mode : 'partial';
     localStorage.setItem('webgl-mode', mode);
+    const selector = document.getElementById('webgl-mode');
+    if (selector) {
+        selector.querySelector('.webgl-selector-value span').textContent = { off: '关闭', partial: '部分', full: '全部' }[mode];
+        selector.querySelectorAll('[role="option"]').forEach(option => option.classList.toggle('selected', option.dataset.value === mode));
+        selector.classList.remove('open');
+    }
     if (window.win12WebGL) window.win12WebGL.apply(mode);
     const native = window.win12Native;
     if (native && native.isTauri && native.isTauri()) {
@@ -2583,10 +2589,17 @@ function setWebGLMode(mode) {
     }
 }
 
+function toggleWebGLSelector(event) {
+    event.stopPropagation();
+    document.getElementById('webgl-mode')?.classList.toggle('open');
+}
+
+document.addEventListener('click', () => document.getElementById('webgl-mode')?.classList.remove('open'));
+
 function loadWebGLMode() {
     const select = document.getElementById('webgl-mode');
     const mode = localStorage.getItem('webgl-mode') || 'off';
-    if (select) select.value = mode;
+    if (select) setWebGLMode(mode);
     if (window.win12WebGL) window.win12WebGL.apply(mode);
 }
 //global
@@ -2814,7 +2827,7 @@ document.getElementsByTagName('body')[0].onload = () => {
                     if (['off', 'partial', 'full'].includes(settings.webgl)) {
                         localStorage.setItem('webgl-mode', settings.webgl);
                         const select = document.getElementById('webgl-mode');
-                        if (select) select.value = settings.webgl;
+                        if (select) setWebGLMode(settings.webgl);
                         if (window.win12WebGL) window.win12WebGL.apply(settings.webgl);
                     }
                 }
