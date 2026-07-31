@@ -33,31 +33,20 @@ window.browser = {
             throw new Error('不允许打开此类型的链接');
         }
 
-        const WebviewWindow = window.__TAURI__?.webviewWindow?.WebviewWindow;
-        if (window.win12Native?.isTauri?.() && WebviewWindow) {
+        const Webview = window.__TAURI__?.webview?.Webview;
+        if (window.win12Native?.isTauri?.() && Webview) {
             if (!label) throw new Error('外部浏览器窗口缺少标签标识');
-            let placement = {};
-            try {
-                const mainWindow = window.__TAURI__.window?.getCurrentWindow?.();
-                if (mainWindow) {
-                    const [position, size] = await Promise.all([mainWindow.outerPosition(), mainWindow.innerSize()]);
-                    placement = { x: position.x, y: position.y, width: size.width, height: size.height };
-                }
-            } catch (_) {}
+            const host = document.querySelector('#win-edge>iframe.show');
+            const rect = host?.getBoundingClientRect() || { left: 0, top: 0, width: 1100, height: 760 };
+            const parentWindow = window.__TAURI__.window?.getCurrentWindow?.();
+            if (!parentWindow) throw new Error('无法获取 Win12 主窗口');
             return new Promise((resolve, reject) => {
-                const webview = new WebviewWindow(label, {
+                const webview = new Webview(parentWindow, label, {
                     url: parsed.href,
-                    title,
-                    parent,
-                    x: placement.x,
-                    y: placement.y,
-                    center: placement.x === undefined,
-                    decorations: false,
-                    resizable: true,
-                    focus: true,
-                    visible: true,
-                    width: placement.width || 1100,
-                    height: placement.height || 760
+                    x: Math.max(0, Math.round(rect.left)),
+                    y: Math.max(0, Math.round(rect.top)),
+                    width: Math.max(720, Math.round(rect.width)),
+                    height: Math.max(520, Math.round(rect.height))
                 });
                 webview.once('tauri://destroyed', () => {
                     if (typeof onDestroyed === 'function') onDestroyed(label);
