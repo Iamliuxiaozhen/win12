@@ -2574,9 +2574,8 @@ function setWebGLMode(mode) {
     localStorage.setItem('webgl-mode', mode);
     const selector = document.getElementById('webgl-mode');
     if (selector) {
-        selector.querySelector('.webgl-selector-value span').textContent = { off: '关闭', partial: '部分', full: '全部' }[mode];
+        // Modes are displayed directly by the segmented control.
         selector.querySelectorAll('[role="option"]').forEach(option => option.classList.toggle('selected', option.dataset.value === mode));
-        selector.classList.remove('open');
     }
     if (window.win12WebGL) window.win12WebGL.apply(mode);
     const native = window.win12Native;
@@ -2588,14 +2587,6 @@ function setWebGLMode(mode) {
         }).catch(e => console.error('Failed to save WebGL setting:', e));
     }
 }
-
-function toggleWebGLSelector(event) {
-    event.stopPropagation();
-    const selector = document.getElementById('webgl-mode');
-    selector?.classList.toggle('open');
-}
-
-document.addEventListener('click', () => document.getElementById('webgl-mode')?.classList.remove('open'));
 
 function loadWebGLMode() {
     const select = document.getElementById('webgl-mode');
