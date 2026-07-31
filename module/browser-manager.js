@@ -27,7 +27,7 @@ window.browser = {
         window.location.href = url;
     },
 
-    async openExternal(url, { label, title = 'Microsoft Edge', parent = 'main' } = {}) {
+    async openExternal(url, { label, title = 'Microsoft Edge', parent = 'main', onDestroyed } = {}) {
         const parsed = new URL(url, window.location.href);
         if (!['http:', 'https:'].includes(parsed.protocol) || /[\u0000-\u001f\u007f]/.test(parsed.href)) {
             throw new Error('不允许打开此类型的链接');
@@ -48,6 +48,9 @@ window.browser = {
                     visible: true,
                     width: 1100,
                     height: 760
+                });
+                webview.once('tauri://destroyed', () => {
+                    if (typeof onDestroyed === 'function') onDestroyed(label);
                 });
                 webview.once('tauri://created', () => resolve(webview));
                 webview.once('tauri://error', event => reject(new Error(String(event.payload || '无法创建 WebView 窗口'))));
