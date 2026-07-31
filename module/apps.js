@@ -2597,6 +2597,9 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
                 delete apps.edge.externalWindows[tab];
             }
         },
+        closeAllExternalWindows: () => {
+            Object.keys(apps.edge.externalWindows).forEach(tab => apps.edge.closeExternalWindow(tab));
+        },
         clearExternalStatus: () => {
             $('#edge-external-status').hide().text('');
             $('#win-edge>iframe.show').show();

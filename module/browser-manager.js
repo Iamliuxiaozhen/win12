@@ -59,6 +59,8 @@ window.browser = {
                     }
                 }).catch(() => {});
                 webview.once('tauri://created', () => resolve(webview));
+                webview.setPosition({ x: Math.max(0, Math.round(rect.left)), y: Math.max(0, Math.round(rect.top)) }).catch(() => {});
+                webview.setSize({ width: Math.max(720, Math.round(rect.width)), height: Math.max(520, Math.round(rect.height)) }).catch(() => {});
                 webview.once('tauri://error', event => reject(new Error(String(event.payload || '无法创建 WebView 窗口'))));
             });
         }
