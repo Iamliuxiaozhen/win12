@@ -44,6 +44,11 @@ window.browser = {
             const height = bounds ? bounds.height : rect.height;
             const parentWindow = window.__TAURI__.window?.getCurrentWindow?.();
             if (!parentWindow) throw new Error('无法获取 Win12 主窗口');
+            const existing = await Webview.getByLabel(label);
+            if (existing) {
+                await existing.close().catch(() => {});
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
             return new Promise((resolve, reject) => {
                 const webview = new Webview(parentWindow, label, {
                     url: parsed.href,
