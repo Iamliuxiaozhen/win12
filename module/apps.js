@@ -2552,6 +2552,7 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
         max: false,
         fuls: false,
         externalUrl: null,
+        externalUrls: Object.create(null),
         externalWindows: Object.create(null),
         b1: false, b2: false, b3: false,
         newtab: () => {
@@ -2596,6 +2597,7 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
                 window.close().catch(() => {});
                 delete apps.edge.externalWindows[tab];
             }
+            delete apps.edge.externalUrls[tab];
         },
         closeAllExternalWindows: () => {
             Object.keys(apps.edge.externalWindows).forEach(tab => apps.edge.closeExternalWindow(tab));
@@ -2656,11 +2658,21 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
         },
         tab: (c) => {
             $('#win-edge>iframe.show').removeClass('show');
-            $('#win-edge>iframe.' + apps.edge.tabs[c][0]).addClass('show');
-            $('#win-edge>.tool>input.url').val($('#win-edge>iframe.' + apps.edge.tabs[c][0]).attr('src') == 'mainpage.html' ? '' : $('#win-edge>iframe.' + apps.edge.tabs[c][0]).attr('src'));
+            const activeTab = apps.edge.tabs[c][0];
+            const activeIframe = $('#win-edge>iframe.' + activeTab);
+            const activeExternal = apps.edge.externalWindows[activeTab];
+            activeIframe.addClass('show');
+            if (activeExternal) {
+                activeIframe.hide();
+                $('#edge-external-status').text('当前标签页使用独立 WebView 渲染').show();
+                $('#win-edge>.tool>input.url').val(apps.edge.externalUrls[activeTab] || '');
+            } else {
+                activeIframe.show();
+                $('#edge-external-status').hide().text('');
+            }
+            $('#win-edge>.tool>input.url').val(activeIframe.attr('src') == 'mainpage.html' ? '' : activeIframe.attr('src'));
             $('#win-edge>.tool>input.rename').removeClass('show');
             apps.edge.checkHistory(apps.edge.tabs[apps.edge.now][0]);
-            const activeTab = apps.edge.tabs[c][0];
             Object.entries(apps.edge.externalWindows).forEach(([tab, webview]) => {
                 if (tab === activeTab) {
                     webview.show().catch(() => {
@@ -2722,6 +2734,7 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
                 const tab = apps.edge.tabs[apps.edge.now][0];
                 apps.edge.closeExternalWindow(tab);
                 apps.edge.externalUrl = target;
+                apps.edge.externalUrls[tab] = target;
                 $('#win-edge>.tool>input.url').val(target);
                 apps.edge.setExternalStatus('正在启动系统 Microsoft Edge…\n' + target);
                 browser.openExternal(target, {
