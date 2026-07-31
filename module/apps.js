@@ -2730,7 +2730,9 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
             // In hybrid/external mode external pages are rendered by the
             // system Edge app. Win12 keeps only a launch/status placeholder;
             // it does not mirror the external page's history in its iframe.
-            if (targetType === 'external' && browser.mode !== 'embedded') {
+            const useDesktopExternalWebview = browser.mode !== 'embedded' &&
+                window.win12Native?.isTauri?.();
+            if (targetType === 'external' && useDesktopExternalWebview) {
                 const tab = apps.edge.tabs[apps.edge.now][0];
                 apps.edge.closeExternalWindow(tab);
                 apps.edge.externalUrl = target;
