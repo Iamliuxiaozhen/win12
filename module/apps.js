@@ -2580,6 +2580,16 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
             status.text(message).css({ display: 'block', color: error ? '#c42b1c' : '' });
             $('#win-edge>iframe.show').hide();
         },
+        updateExternalTitle: (tab, title) => {
+            const item = apps.edge.tabs.find(entry => entry[0] === tab);
+            if (!item || !title) return;
+            item[1] = title;
+            m_tab.settabs('edge');
+        },
+        updateExternalUrl: (tab, url) => {
+            const index = apps.edge.tabs.findIndex(entry => entry[0] === tab);
+            if (index === apps.edge.now && url) $('#win-edge>.tool>input.url').val(url);
+        },
         closeExternalWindow: (tab) => {
             const window = apps.edge.externalWindows[tab];
             if (window) {
@@ -2718,14 +2728,13 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
                     onDestroyed: (label) => {
                         const destroyedTab = label.replace(/^edge-/, '');
                         delete apps.edge.externalWindows[destroyedTab];
-                    }
+                    },
+                    onTitle: (title) => apps.edge.updateExternalTitle(tab, title),
+                    onUrl: (url) => apps.edge.updateExternalUrl(tab, url)
                 }).then((webview) => {
                     apps.edge.externalWindows[tab] = webview;
-                    setTimeout(() => {
-                        $('#edge-external-status').hide().text('');
-                        $('#win-edge>iframe.show').hide();
-                    }, 0);
                     apps.edge.setExternalStatus('外部网页已在 Win12 Edge 窗口中打开\n' + target);
+                    apps.edge.setExternalStatus('当前标签页使用独立 WebView 渲染');
                 }).catch((error) => {
                     apps.edge.setExternalStatus('无法打开外部网页\n' + (error?.message || error), true);
                 });

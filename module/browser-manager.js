@@ -27,7 +27,7 @@ window.browser = {
         window.location.href = url;
     },
 
-    async openExternal(url, { label, title = 'Microsoft Edge', parent = 'main', onDestroyed } = {}) {
+    async openExternal(url, { label, title = 'Microsoft Edge', parent = 'main', onDestroyed, onTitle, onUrl } = {}) {
         const parsed = new URL(url, window.location.href);
         if (!['http:', 'https:'].includes(parsed.protocol) || /[\u0000-\u001f\u007f]/.test(parsed.href)) {
             throw new Error('不允许打开此类型的链接');
@@ -36,22 +36,39 @@ window.browser = {
         const WebviewWindow = window.__TAURI__?.webviewWindow?.WebviewWindow;
         if (window.win12Native?.isTauri?.() && WebviewWindow) {
             if (!label) throw new Error('外部浏览器窗口缺少标签标识');
+            let placement = {};
+            try {
+                const mainWindow = window.__TAURI__.window?.getCurrentWindow?.();
+                if (mainWindow) {
+                    const [position, size] = await Promise.all([mainWindow.outerPosition(), mainWindow.innerSize()]);
+                    placement = { x: position.x, y: position.y, width: size.width, height: size.height };
+                }
+            } catch (_) {}
             return new Promise((resolve, reject) => {
                 const webview = new WebviewWindow(label, {
                     url: parsed.href,
                     title,
                     parent,
-                    center: true,
-                    decorations: true,
+                    x: placement.x,
+                    y: placement.y,
+                    center: placement.x === undefined,
+                    decorations: false,
                     resizable: true,
                     focus: true,
                     visible: true,
-                    width: 1100,
-                    height: 760
+                    width: placement.width || 1100,
+                    height: placement.height || 760
                 });
                 webview.once('tauri://destroyed', () => {
                     if (typeof onDestroyed === 'function') onDestroyed(label);
                 });
+                webview.listen('tauri://page-load', (event) => {
+                    const payload = event.payload || {};
+                    if (payload.url && typeof onUrl === 'function') onUrl(payload.url);
+                    if (typeof onTitle === 'function') {
+                        webview.title().then(onTitle).catch(() => {});
+                    }
+                }).catch(() => {});
                 webview.once('tauri://created', () => resolve(webview));
                 webview.once('tauri://error', event => reject(new Error(String(event.payload || '无法创建 WebView 窗口'))));
             });
