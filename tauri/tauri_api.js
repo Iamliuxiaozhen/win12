@@ -33,6 +33,10 @@ window.win12Native = {
     await window.__TAURI__.core.invoke("write_settings", { json: JSON.stringify(settings) });
     return true;
   },
+  async openExternalUrl(url) {
+    if (!this.isTauri()) return false;
+    return await window.__TAURI__.core.invoke("open_external_url", { url });
+  },
   async pingHost(host, ipv6 = false, onOutput = null) {
     if (!this.isTauri()) {
       throw new Error("ping/ping6 仅在 桌面版 中支持使用");

@@ -2537,6 +2537,7 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
     },
     edge: {
         init: () => {
+            browser.configure(localStorage.getItem('win12.browser.mode') || 'hybrid');
             $('#win-edge>iframe').remove();
             apps.edge.tabs = [];
             apps.edge.len = 0;
@@ -2550,6 +2551,7 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
         reloadElt: '<loading class="reloading"><svg viewBox="0 0 16 16"><circle cx="8px" cy="8px" r="5px"></circle><circle cx="8px" cy="8px" r="5px"></circle></svg></loading>',
         max: false,
         fuls: false,
+        externalUrl: null,
         b1: false, b2: false, b3: false,
         newtab: () => {
             m_tab.newtab('edge', '新建标签页');
@@ -2571,6 +2573,15 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
             };
             m_tab.tab('edge', apps.edge.tabs.length - 1);
             apps.edge.checkHistory(apps.edge.tabs[apps.edge.now][0]);
+        },
+        setExternalStatus: (message, error = false) => {
+            const status = $('#edge-external-status');
+            status.text(message).css({ display: 'block', color: error ? '#c42b1c' : '' });
+            $('#win-edge>iframe.show').hide();
+        },
+        clearExternalStatus: () => {
+            $('#edge-external-status').hide().text('');
+            $('#win-edge>iframe.show').show();
         },
         fullscreen: () => {
             if (!apps.edge.max) {
@@ -2661,6 +2672,29 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
             }
         },
         goto: (u, clear = true) => {
+            const input = String(u || '').trim();
+            const target = /^https?:\/\//i.test(input) ? input :
+                (/^mainpage\.html$/.test(input) ? input :
+                    (/^[^\s/]+\.[^\s/]+/.test(input) ? 'http://' + input :
+                        'https://bing.com/search?q=' + encodeURIComponent(input)));
+            const targetType = browser.classify(target);
+
+            // In hybrid/external mode external pages are rendered by the
+            // system Edge app. Win12 keeps only a launch/status placeholder;
+            // it does not mirror the external page's history in its iframe.
+            if (targetType === 'external' && browser.mode !== 'embedded') {
+                apps.edge.externalUrl = target;
+                $('#win-edge>.tool>input.url').val(target);
+                apps.edge.setExternalStatus('正在启动系统 Microsoft Edge…\n' + target);
+                browser.openExternal(target).then(() => {
+                    apps.edge.setExternalStatus('已在系统 Microsoft Edge 中打开\n' + target);
+                }).catch((error) => {
+                    apps.edge.setExternalStatus('无法打开外部网页\n' + (error?.message || error), true);
+                });
+                return;
+            }
+
+            apps.edge.clearExternalStatus();
             if (wifiStatus == false) {
                 m_tab.rename('edge', u);
                 $('#win-edge>iframe.show').attr('src', '.data/disconnected' + (isDark ? '_dark' : '') + '.html');
