@@ -2736,11 +2736,18 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
                 apps.edge.externalUrl = target;
                 apps.edge.externalUrls[tab] = target;
                 $('#win-edge>.tool>input.url').val(target);
+                const contentRect = $('#win-edge>iframe.show')[0]?.getBoundingClientRect();
                 apps.edge.setExternalStatus('正在启动系统 Microsoft Edge…\n' + target);
                 browser.openExternal(target, {
                     label: 'edge-' + tab,
                     title: 'Win12 Edge',
                     parent: 'main',
+                    bounds: contentRect && {
+                        x: contentRect.left,
+                        y: contentRect.top,
+                        width: contentRect.width,
+                        height: contentRect.height
+                    },
                     onDestroyed: (label) => {
                         const destroyedTab = label.replace(/^edge-/, '');
                         delete apps.edge.externalWindows[destroyedTab];

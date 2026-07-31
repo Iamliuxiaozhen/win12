@@ -27,7 +27,7 @@ window.browser = {
         window.location.href = url;
     },
 
-    async openExternal(url, { label, title = 'Microsoft Edge', parent = 'main', onDestroyed, onTitle, onUrl } = {}) {
+    async openExternal(url, { label, title = 'Microsoft Edge', parent = 'main', bounds, onDestroyed, onTitle, onUrl } = {}) {
         const parsed = new URL(url, window.location.href);
         if (!['http:', 'https:'].includes(parsed.protocol) || /[\u0000-\u001f\u007f]/.test(parsed.href)) {
             throw new Error('不允许打开此类型的链接');
@@ -37,16 +37,20 @@ window.browser = {
         if (window.win12Native?.isTauri?.() && Webview) {
             if (!label) throw new Error('外部浏览器窗口缺少标签标识');
             const host = document.querySelector('#win-edge>iframe.show');
-            const rect = host?.getBoundingClientRect() || { left: 0, top: 0, width: 1100, height: 760 };
+            const rect = bounds || host?.getBoundingClientRect() || { left: 0, top: 0, width: 1100, height: 760 };
+            const left = bounds ? bounds.x : rect.left;
+            const top = bounds ? bounds.y : rect.top;
+            const width = bounds ? bounds.width : rect.width;
+            const height = bounds ? bounds.height : rect.height;
             const parentWindow = window.__TAURI__.window?.getCurrentWindow?.();
             if (!parentWindow) throw new Error('无法获取 Win12 主窗口');
             return new Promise((resolve, reject) => {
                 const webview = new Webview(parentWindow, label, {
                     url: parsed.href,
-                    x: Math.max(0, Math.round(rect.left)),
-                    y: Math.max(0, Math.round(rect.top)),
-                    width: Math.max(720, Math.round(rect.width)),
-                    height: Math.max(520, Math.round(rect.height))
+                    x: Math.max(0, Math.round(left)),
+                    y: Math.max(0, Math.round(top)),
+                    width: Math.max(720, Math.round(width)),
+                    height: Math.max(520, Math.round(height))
                 });
                 webview.once('tauri://destroyed', () => {
                     if (typeof onDestroyed === 'function') onDestroyed(label);
@@ -59,8 +63,8 @@ window.browser = {
                     }
                 }).catch(() => {});
                 webview.once('tauri://created', () => resolve(webview));
-                webview.setPosition({ x: Math.max(0, Math.round(rect.left)), y: Math.max(0, Math.round(rect.top)) }).catch(() => {});
-                webview.setSize({ width: Math.max(720, Math.round(rect.width)), height: Math.max(520, Math.round(rect.height)) }).catch(() => {});
+                webview.setPosition({ x: Math.max(0, Math.round(left)), y: Math.max(0, Math.round(top)) }).catch(() => {});
+                webview.setSize({ width: Math.max(720, Math.round(width)), height: Math.max(520, Math.round(height)) }).catch(() => {});
                 webview.once('tauri://error', event => reject(new Error(String(event.payload || '无法创建 WebView 窗口'))));
             });
         }
