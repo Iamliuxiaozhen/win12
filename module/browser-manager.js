@@ -27,19 +27,31 @@ window.browser = {
         window.location.href = url;
     },
 
-    async openExternal(url, { fallback = true } = {}) {
+    async openExternal(url, { label, title = 'Microsoft Edge', parent = 'main' } = {}) {
         const parsed = new URL(url, window.location.href);
         if (!['http:', 'https:'].includes(parsed.protocol) || /[\u0000-\u001f\u007f]/.test(parsed.href)) {
             throw new Error('不允许打开此类型的链接');
         }
 
-        if (window.win12Native && window.win12Native.isTauri()) {
-            try {
-                return await window.win12Native.openExternalUrl(parsed.href);
-            } catch (error) {
-                if (!fallback) throw error;
-                return this.fallback(parsed.href, error);
-            }
+        const WebviewWindow = window.__TAURI__?.webviewWindow?.WebviewWindow;
+        if (window.win12Native?.isTauri?.() && WebviewWindow) {
+            if (!label) throw new Error('外部浏览器窗口缺少标签标识');
+            return new Promise((resolve, reject) => {
+                const webview = new WebviewWindow(label, {
+                    url: parsed.href,
+                    title,
+                    parent,
+                    center: true,
+                    decorations: true,
+                    resizable: true,
+                    focus: true,
+                    visible: true,
+                    width: 1100,
+                    height: 760
+                });
+                webview.once('tauri://created', () => resolve(webview));
+                webview.once('tauri://error', event => reject(new Error(String(event.payload || '无法创建 WebView 窗口'))));
+            });
         }
 
         return this.fallback(parsed.href);

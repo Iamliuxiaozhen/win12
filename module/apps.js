@@ -2552,6 +2552,7 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
         max: false,
         fuls: false,
         externalUrl: null,
+        externalWindows: Object.create(null),
         b1: false, b2: false, b3: false,
         newtab: () => {
             m_tab.newtab('edge', '新建标签页');
@@ -2578,6 +2579,13 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
             const status = $('#edge-external-status');
             status.text(message).css({ display: 'block', color: error ? '#c42b1c' : '' });
             $('#win-edge>iframe.show').hide();
+        },
+        closeExternalWindow: (tab) => {
+            const window = apps.edge.externalWindows[tab];
+            if (window) {
+                window.close().catch(() => {});
+                delete apps.edge.externalWindows[tab];
+            }
         },
         clearExternalStatus: () => {
             $('#edge-external-status').hide().text('');
@@ -2639,6 +2647,15 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
             $('#win-edge>.tool>input.url').val($('#win-edge>iframe.' + apps.edge.tabs[c][0]).attr('src') == 'mainpage.html' ? '' : $('#win-edge>iframe.' + apps.edge.tabs[c][0]).attr('src'));
             $('#win-edge>.tool>input.rename').removeClass('show');
             apps.edge.checkHistory(apps.edge.tabs[apps.edge.now][0]);
+            const activeTab = apps.edge.tabs[c][0];
+            Object.entries(apps.edge.externalWindows).forEach(([tab, webview]) => {
+                if (tab === activeTab) {
+                    webview.show().catch(() => {});
+                    webview.setFocus().catch(() => {});
+                } else {
+                    webview.hide().catch(() => {});
+                }
+            });
         },
         c_rename: (c) => {
             m_tab.tab('edge', c);
@@ -2683,11 +2700,14 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
             // system Edge app. Win12 keeps only a launch/status placeholder;
             // it does not mirror the external page's history in its iframe.
             if (targetType === 'external' && browser.mode !== 'embedded') {
+                const tab = apps.edge.tabs[apps.edge.now][0];
+                apps.edge.closeExternalWindow(tab);
                 apps.edge.externalUrl = target;
                 $('#win-edge>.tool>input.url').val(target);
                 apps.edge.setExternalStatus('正在启动系统 Microsoft Edge…\n' + target);
-                browser.openExternal(target).then(() => {
-                    apps.edge.setExternalStatus('已在系统 Microsoft Edge 中打开\n' + target);
+                browser.openExternal(target, { label: 'edge-' + tab, title: 'Win12 Edge', parent: 'main' }).then((webview) => {
+                    apps.edge.externalWindows[tab] = webview;
+                    apps.edge.setExternalStatus('外部网页已在 Win12 Edge 窗口中打开\n' + target);
                 }).catch((error) => {
                     apps.edge.setExternalStatus('无法打开外部网页\n' + (error?.message || error), true);
                 });
