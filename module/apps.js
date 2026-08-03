@@ -2766,7 +2766,7 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
                 return;
             }
 
-apps.edge.closeExternalWindow(apps.edge.tabs[apps.edge.now][0]);
+            apps.edge.closeExternalWindow(apps.edge.tabs[apps.edge.now][0]);
             if (wifiStatus == false) {
                 m_tab.rename('edge', u);
                 $('#win-edge>iframe.show').attr('src', '.data/disconnected' + (isDark ? '_dark' : '') + '.html');
