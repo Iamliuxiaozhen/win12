@@ -2670,7 +2670,7 @@ Micrȯsoft Windows [版本 12.0.39035.7324]
                 activeIframe.show();
                 $('#edge-external-status').hide().text('');
             }
-            $('#win-edge>.tool>input.url').val(activeIframe.attr('src') == 'mainpage.html' ? '' : activeIframe.attr('src'));
+            if (!activeExternal) $('#win-edge>.tool>input.url').val(activeIframe.attr('src') === 'mainpage.html' ? '' : activeIframe.attr('src'));
             $('#win-edge>.tool>input.rename').removeClass('show');
             apps.edge.checkHistory(apps.edge.tabs[apps.edge.now][0]);
             Object.entries(apps.edge.externalWindows).forEach(([tab, webview]) => {
