@@ -127,7 +127,7 @@ function openExternalInWin12Browser(value) {
     const url = new URL(value, window.location.href).href;
     openapp('edge');
     window.setTimeout(() => {
-        if (window.apps && apps.edge && typeof apps.edge.newtab === 'function' &&
+if (apps.edge && typeof apps.edge.newtab === 'function' &&
             typeof apps.edge.goto === 'function') {
             apps.edge.newtab();
             apps.edge.goto(url);
